@@ -1,13 +1,95 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + TS</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TicketHub – Purchase</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    input, button {
+      display: block;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎫 Purchase Concert Tickets</h1>
+  <form id="ticketForm">
+    <input name="email" placeholder="Email" required />
+    <input name="name" placeholder="Name" required />
+    <input name="phone" placeholder="Phone" required />
+    <input name="quantity" type="number" min="1" max="10" required />
+    <input name="creditCard" placeholder="Credit Card" required />
+    <input name="expiration" placeholder="MM/YY" required />
+    <input name="securityCode" placeholder="CVV" required />
+    <input name="address" placeholder="Address" required />
+    <input name="city" placeholder="City" required />
+    <input name="province" placeholder="Province" required />
+    <input name="postalCode" placeholder="Postal Code" required />
+    <input name="country" placeholder="Country" required />
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('ticketForm');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = {
+        concertId: 456,
+        email: formData.get('email'),
+        name: formData.get('name'),
+        phone: formData.get('phone'),
+        quantity: Number(formData.get('quantity')),
+        creditCard: formData.get('creditCard'),
+        expiration: formData.get('expiration'),
+        securityCode: formData.get('securityCode'),
+        address: formData.get('address'),
+        city: formData.get('city'),
+        province: formData.get('province'),
+        postalCode: formData.get('postalCode'),
+        country: formData.get('country'),
+      };
+
+      try {
+        const res = await fetch('https://tickethub-api9021-gng3g3hbc6fwb3eb.canadacentral-01.azurewebsites.net/api/tickets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+
+        if (res.ok) {
+        alert('Ticket submitted!');
+        form.reset();
+      } else {
+        const errorText = await res.text();
+        alert('Submission failed: ' + errorText);
+      }
+
+    } catch (err) {
+      console.error("Error sending request:", err);
+      alert('Something went wrong.');
+    }
+
+    });
+  </script>
+</body>
 </html>
