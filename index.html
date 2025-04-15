@@ -47,6 +47,7 @@
 
   <script>
     const form = document.getElementById('ticketForm');
+    const state = {}; // holds values on error
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -68,27 +69,41 @@
         country: formData.get('country'),
       };
 
+      // Save current values to state
+      Object.keys(data).forEach(key => state[key] = data[key]);
+
       try {
-        const res = await fetch('https://tickethub-api9021-gng3g3hbc6fwb3eb.canadacentral-01.azurewebsites.net/api/tickets', {
+        const res = await fetch('https://tickethub-api9021-gng3g3hbc6fwb3eb.canadacentral-01.azurewebsites.net/api/tickets/purchase', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
 
-
         if (res.ok) {
-        alert('Ticket submitted!');
-        form.reset();
-      } else {
-        const errorText = await res.text();
-        alert('Submission failed: ' + errorText);
+          alert('✅ Ticket submitted successfully!');
+          form.reset();
+          Object.keys(state).forEach(key => delete state[key]); // clear memory
+        } else {
+          const errorObj = await res.json();
+          if (errorObj.errors) {
+            const messages = Object.entries(errorObj.errors)
+              .map(([field, issues]) => `${field}: ${issues.join(', ')}`)
+              .join('\n');
+            alert("⚠️ Validation errors:\n" + messages);
+          } else {
+            alert("⚠️ Submission failed.");
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        alert('❌ Something went wrong.');
       }
 
-    } catch (err) {
-      console.error("Error sending request:", err);
-      alert('Something went wrong.');
-    }
-
+      // Refill form with saved state after failure
+      for (const [key, value] of Object.entries(state)) {
+        const input = form.querySelector(`[name="${key}"]`);
+        if (input) input.value = value;
+      }
     });
   </script>
 </body>
